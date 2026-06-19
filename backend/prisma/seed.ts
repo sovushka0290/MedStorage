@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -8,6 +9,28 @@ async function main() {
   await prisma.transaction.deleteMany();
   await prisma.medication.deleteMany();
   await prisma.location.deleteMany();
+  await prisma.user.deleteMany();
+
+  console.log('Создание тестовых пользователей...');
+  const hashedPassword = await bcrypt.hash('password123', 10);
+  
+  await prisma.user.create({
+    data: {
+      email: 'admin@medsklad.kz',
+      password: hashedPassword,
+      role: 'ADMIN',
+      name: 'Главный администратор'
+    }
+  });
+
+  await prisma.user.create({
+    data: {
+      email: 'nurse@medsklad.kz',
+      password: hashedPassword,
+      role: 'NURSE',
+      name: 'Медсестра Кабинет 1'
+    }
+  });
 
   console.log('Создание локаций...');
   const mainStorage = await prisma.location.create({

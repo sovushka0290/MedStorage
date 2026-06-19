@@ -10,6 +10,8 @@ datasource db {
 
 enum Role {
   ADMIN
+  MANAGER
+  HEAD_NURSE
   STOREKEEPER
   NURSE
 }
@@ -20,35 +22,38 @@ enum LocationType {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  role      Role     @default(NURSE)
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int            @id @default(autoincrement())
+  email         String         @unique
+  password      String
+  role          Role           @default(NURSE)
+  name          String?
+  procedureLogs ProcedureLog[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Location {
-  id          Int          @id @default(autoincrement())
-  name        String
-  type        LocationType @default(CABINET)
-  description String?
-  batches     Batch[]
-  transactions Transaction[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id            Int            @id @default(autoincrement())
+  name          String
+  type          LocationType   @default(CABINET)
+  description   String?
+  batches       Batch[]
+  transactions  Transaction[]
+  procedureLogs ProcedureLog[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 }
 
 model Medication {
-  id          Int      @id @default(autoincrement())
-  barcode     String   @unique
-  name        String
-  minQuantity Int      @default(10)
-  batches     Batch[]
-  transactions Transaction[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             Int             @id @default(autoincrement())
+  barcode        String          @unique
+  name           String
+  minQuantity    Int             @default(10)
+  batches        Batch[]
+  transactions   Transaction[]
+  procedureNorms ProcedureNorm[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 }
 
 model Batch {
@@ -76,4 +81,37 @@ model Transaction {
   locationId   Int
   location     Location        @relation(fields: [locationId], references: [id])
   createdAt    DateTime        @default(now())
+}
+
+model Procedure {
+  id          Int             @id @default(autoincrement())
+  name        String
+  description String?
+  norms       ProcedureNorm[]
+  logs        ProcedureLog[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model ProcedureNorm {
+  id               Int        @id @default(autoincrement())
+  procedureId      Int
+  procedure        Procedure  @relation(fields: [procedureId], references: [id])
+  medicationId     Int
+  medication       Medication @relation(fields: [medicationId], references: [id])
+  expectedQuantity Float      @default(1.0)
+  tolerancePercent Float      @default(0.0)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}
+
+model ProcedureLog {
+  id           Int        @id @default(autoincrement())
+  procedureId  Int
+  procedure    Procedure  @relation(fields: [procedureId], references: [id])
+  locationId   Int
+  location     Location   @relation(fields: [locationId], references: [id])
+  userId       Int
+  user         User       @relation(fields: [userId], references: [id])
+  createdAt    DateTime   @default(now())
 }

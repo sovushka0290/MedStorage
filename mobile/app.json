@@ -10,7 +10,8 @@
         {
           "cameraPermission": "Allow MedSklad to access your camera for scanning barcodes."
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }

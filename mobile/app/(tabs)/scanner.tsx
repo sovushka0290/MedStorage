@@ -154,11 +154,7 @@ export default function ScannerScreen() {
           onPress: async () => {
             setLoading(true);
             try {
-              const response = await api.put(`/medications/${medId}`, { barcode }, {
-                headers: {
-                  'x-api-key': 'MedSkladSecretKey123',
-                },
-              });
+              const response = await api.put(`/medications/${medId}`, { barcode });
               Alert.alert('Успех', 'Штрихкод успешно привязан!');
               
               // Загружаем обновленные данные товара
@@ -192,10 +188,6 @@ export default function ScannerScreen() {
         quantity,
         medicationId: medication.id,
         locationId,
-      }, {
-        headers: {
-          'x-api-key': 'MedSkladSecretKey123', // Передаем API ключ для записи
-        },
       });
 
       // Перезапрашиваем остатки по товару
