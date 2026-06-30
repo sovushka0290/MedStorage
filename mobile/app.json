@@ -1,9 +1,12 @@
 {
   "expo": {
     "name": "MedSklad",
-    "slug": "medsklad",
+    "slug": "alikhan",
     "version": "1.0.0",
     "scheme": "medsklad",
+    "android": {
+      "package": "com.alikhan.medsklad"
+    },
     "plugins": [
       [
         "expo-camera",
@@ -12,6 +15,12 @@
         }
       ],
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b673f815-f261-4e40-b0f6-8208c943d0b1"
+      }
+    },
+    "owner": "sovushka0290s-team"
   }
 }

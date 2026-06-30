@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import './types/express'; // Расширение типов Express
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
