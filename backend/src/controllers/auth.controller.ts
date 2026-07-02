@@ -45,7 +45,7 @@ export const authController = {
 
   async me(req: Request, res: Response, next: NextFunction) {
     try {
-      const user = req.user;
+      const user = (req as any).user;
       if (!user) {
         return res.status(401).json({ success: false, error: 'Не авторизован' });
       }

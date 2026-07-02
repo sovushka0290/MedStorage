@@ -26,35 +26,38 @@ export const MedicationCard: React.FC<MedicationCardProps> = ({ item, onTransact
 
   return (
     <View 
-      className={`bg-white mb-3 rounded-2xl shadow-sm border-l-4 overflow-hidden border ${
-        isCritical ? 'border-l-red-500 border-red-100' : 'border-l-green-500 border-slate-100'
+      className={`bg-white mb-4 rounded-3xl shadow-lg border-l-[6px] overflow-hidden ${
+        isCritical ? 'border-l-rose-500 shadow-rose-100' : 'border-l-emerald-500 shadow-slate-200/60'
       }`}
     >
-      <View className="p-4">
+      <View className="p-5">
         {/* Шапка карточки */}
         <View className="flex-row justify-between items-start">
-          <View className="flex-1 pr-2">
-            <Text className="text-base font-bold text-[#0A2342] leading-tight">
+          <View className="flex-1 pr-3">
+            <Text className="text-lg font-extrabold text-slate-800 leading-tight mb-1">
               {item.name}
             </Text>
-            <Text className="text-slate-400 text-xs mt-1">
-              ШК: {item.barcode || 'Не привязан'}
-            </Text>
+            <View className="flex-row items-center bg-slate-50 self-start px-2 py-1 rounded-md mt-1">
+              <MaterialIcons name="qr-code-scanner" size={12} color="#64748B" />
+              <Text className="text-slate-500 text-xs ml-1 font-medium">
+                {item.barcode || 'Нет штрихкода'}
+              </Text>
+            </View>
           </View>
           
           {/* Индикатор остатка */}
-          <View className="items-end">
-            <View className={`px-2.5 py-1.5 rounded-xl ${
-              isCritical ? 'bg-red-50' : 'bg-green-50'
+          <View className="items-end ml-2">
+            <View className={`px-3 py-1.5 rounded-2xl border ${
+              isCritical ? 'bg-rose-50 border-rose-100' : 'bg-emerald-50 border-emerald-100'
             }`}>
-              <Text className={`font-bold text-sm ${
-                isCritical ? 'text-red-600' : 'text-green-600'
+              <Text className={`font-black text-lg ${
+                isCritical ? 'text-rose-600' : 'text-emerald-600'
               }`}>
-                {totalStock} шт
+                {totalStock} <Text className="text-xs font-bold">шт</Text>
               </Text>
             </View>
-            <Text className="text-[10px] text-slate-400 mt-1 font-semibold">
-              Лимит: {item.minQuantity} шт
+            <Text className="text-[11px] text-slate-400 mt-1.5 font-bold uppercase tracking-wider">
+              Мин: {item.minQuantity}
             </Text>
           </View>
         </View>

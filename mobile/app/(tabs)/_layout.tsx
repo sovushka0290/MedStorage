@@ -1,104 +1,128 @@
 import { Tabs, Redirect } from 'expo-router';
 import React from 'react';
-import { Platform, Text } from 'react-native';
+import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../../src/context/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function TabLayout() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   
   if (!user) {
     return <Redirect href="/login" />;
   }
 
   const role = user.role;
+  const isManagement = role === 'ADMIN' || role === 'MANAGER' || role === 'HEAD_NURSE';
+  const isStorekeeper = role === 'STOREKEEPER' || role === 'ADMIN' || role === 'MANAGER';
+  const isNurse = role === 'NURSE';
 
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: '#0891B2',
-        tabBarInactiveTintColor: '#64748B',
+        tabBarInactiveTintColor: '#94A3B8',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopWidth: 1,
-          borderTopColor: '#E2E8F0',
-          height: Platform.OS === 'ios' ? 88 : 60,
-          paddingBottom: Platform.OS === 'ios' ? 25 : 10,
-          paddingTop: 8,
+          borderTopColor: '#F1F5F9',
+          elevation: 10,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.05,
+          shadowRadius: 12,
+          height: Platform.OS === 'ios' ? 88 : 70,
+          paddingBottom: Platform.OS === 'ios' ? 25 : 12,
+          paddingTop: 12,
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600',
+          marginTop: 4,
         },
         headerStyle: {
           backgroundColor: '#0A2342',
+          elevation: 0,
+          shadowOpacity: 0,
         },
         headerTintColor: '#FFFFFF',
         headerTitleStyle: {
-          fontWeight: 'bold',
+          fontWeight: '800',
+          fontSize: 20,
         },
+        headerRight: () => (
+          <TouchableOpacity 
+            onPress={logout}
+            className="mr-4 p-2 rounded-full bg-white/10 active:bg-white/20"
+          >
+            <Ionicons name="log-out-outline" size={22} color="#FFFFFF" />
+          </TouchableOpacity>
+        ),
       }}
     >
-      {/* Склад (STOREKEEPER, HEAD_NURSE) */}
+      {/* Склад (STOREKEEPER, HEAD_NURSE, ADMIN, MANAGER) */}
       <Tabs.Screen
         name="index"
         options={{
-          href: (role === 'STOREKEEPER' || role === 'HEAD_NURSE') ? '/' : null,
+          href: (isStorekeeper || isManagement) && !isNurse ? '/' : null,
           title: 'Склад',
           headerTitle: 'Склад Медикаментов',
-          tabBarIcon: ({ color }) => (
-            <Text style={{ color, fontSize: 20 }}>📦</Text>
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'cube' : 'cube-outline'} size={26} color={color} />
           ),
         }}
       />
       
-      {/* Дефицит (STOREKEEPER, HEAD_NURSE) */}
+      {/* Дефицит */}
       <Tabs.Screen
         name="critical"
         options={{
-          href: (role === 'STOREKEEPER' || role === 'HEAD_NURSE') ? '/critical' : null,
+          href: (isStorekeeper || isManagement) && !isNurse ? '/critical' : null,
           title: 'Дефицит',
           headerTitle: 'Критические остатки',
-          tabBarIcon: ({ color }) => (
-            <Text style={{ color, fontSize: 20 }}>⚠️</Text>
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'warning' : 'warning-outline'} size={26} color={color} />
           ),
         }}
       />
       
-      {/* Сканер/Операции (STOREKEEPER) */}
+      {/* Сканер/Операции */}
       <Tabs.Screen
         name="scanner"
         options={{
-          href: role === 'STOREKEEPER' ? '/scanner' : null,
+          href: isStorekeeper && !isNurse ? '/scanner' : null,
           title: 'Сканер',
           headerTitle: 'Операции со складом',
-          tabBarIcon: ({ color }) => (
-            <Text style={{ color, fontSize: 20 }}>📷</Text>
+          tabBarIcon: ({ color, focused }) => (
+            <View className={`w-12 h-12 rounded-full items-center justify-center -mt-4 shadow-lg ${focused ? 'bg-[#0891B2] shadow-cyan-500/50' : 'bg-slate-800 shadow-slate-500/30'}`}>
+              <Ionicons name="scan" size={24} color="#FFF" />
+            </View>
           ),
+          tabBarLabel: () => null,
         }}
       />
 
-      {/* Мой расход (NURSE) */}
+      {/* Мой расход (NURSE, ADMIN) */}
       <Tabs.Screen
         name="nurse_dashboard"
         options={{
-          href: role === 'NURSE' ? '/nurse_dashboard' : null,
+          href: (isNurse || role === 'ADMIN') ? '/nurse_dashboard' : null,
           title: 'Расход',
           headerTitle: 'Мой расход',
-          tabBarIcon: ({ color }) => (
-            <Text style={{ color, fontSize: 20 }}>💉</Text>
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'medkit' : 'medkit-outline'} size={26} color={color} />
           ),
         }}
       />
 
-      {/* Аналитика (HEAD_NURSE) */}
+      {/* Аналитика */}
       <Tabs.Screen
         name="head_nurse_stats"
         options={{
-          href: role === 'HEAD_NURSE' ? '/head_nurse_stats' : null,
+          href: isManagement ? '/head_nurse_stats' : null,
           title: 'Аналитика',
-          headerTitle: 'Статистика по кабинетам',
-          tabBarIcon: ({ color }) => (
-            <Text style={{ color, fontSize: 20 }}>📊</Text>
+          headerTitle: 'Статистика',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'stats-chart' : 'stats-chart-outline'} size={26} color={color} />
           ),
         }}
       />
