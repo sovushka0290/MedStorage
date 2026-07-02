@@ -21,7 +21,7 @@ export const errorHandler = (err: any, req: Request, res: Response, _next: NextF
 
   res.status(statusCode).json({
     success: false,
-    error: statusCode === 500 ? 'Внутренняя ошибка сервера' : err.message,
+    error: err.message,
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
 };
