@@ -1,110 +1,87 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, Image, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useAuth } from '../src/context/AuthContext';
 import { api } from '../src/api/api';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+
+const ROLES = [
+  { id: 'ADMIN', name: 'Администратор', email: 'admin@medsklad.kz', icon: '👑', color: 'bg-rose-500', text: 'text-rose-500' },
+  { id: 'HEAD_NURSE', name: 'Старшая медсестра', email: 'headnurse@medsklad.kz', icon: '⭐', color: 'bg-purple-500', text: 'text-purple-500' },
+  { id: 'NURSE', name: 'Медсестра', email: 'nurse@medsklad.kz', icon: '💉', color: 'bg-emerald-500', text: 'text-emerald-500' },
+  { id: 'MANAGER', name: 'Менеджер', email: 'manager@medsklad.kz', icon: '📊', color: 'bg-blue-500', text: 'text-blue-500' },
+  { id: 'STOREKEEPER', name: 'Кладовщик', email: 'storekeeper@medsklad.kz', icon: '📦', color: 'bg-amber-500', text: 'text-amber-500' }
+];
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [loadingRole, setLoadingRole] = useState<string | null>(null);
   const { login } = useAuth();
   const router = useRouter();
 
-  const handleLogin = async () => {
+  const handleRoleLogin = async (roleId: string, email: string) => {
     try {
-      const response = await api.post('/auth/login', { email, password });
-      await login(response.data.token, response.data.user);
-      router.replace('/(tabs)');
+      setLoadingRole(roleId);
+      const response = await api.post('/auth/login', {
+        email,
+        password: 'password123',
+      });
+      if (response.data.success) {
+        await login(response.data.data.token, response.data.data.user);
+        router.replace('/(tabs)');
+      } else {
+        Alert.alert('Ошибка', response.data.error || 'Ошибка входа');
+      }
     } catch (error: any) {
-      Alert.alert('Ошибка авторизации', error.response?.data?.error || 'Не удалось войти');
+      console.error('Login error:', error);
+      Alert.alert('Ошибка сети', 'Не удалось подключиться к серверу');
+    } finally {
+      setLoadingRole(null);
     }
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-[#0A2342]"
-    >
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-      
-      {/* Верхняя декоративная часть */}
-      <View className="flex-[0.4] justify-center items-center px-6 pt-12">
-        <View className="w-24 h-24 bg-white/10 rounded-full items-center justify-center mb-6">
-          <Ionicons name="medical" size={48} color="#0891B2" />
+    <View className="flex-1 bg-slate-50 relative">
+      <View className="absolute top-0 left-0 right-0 h-[40%] bg-[#0A2342] rounded-b-[40px] items-center justify-center pt-10">
+        <View className="bg-white/20 p-4 rounded-3xl mb-4">
+          <Text className="text-white text-5xl">💊</Text>
         </View>
-        <Text className="text-4xl font-bold text-white mb-2 tracking-wider">
-          МедСклад
-        </Text>
-        <Text className="text-cyan-200/80 text-base font-medium text-center px-4">
-          Система умного управления медицинскими запасами
-        </Text>
+        <Text className="text-white text-3xl font-bold tracking-wider">MedSklad</Text>
+        <Text className="text-blue-100 text-sm mt-2 opacity-80 uppercase tracking-widest font-medium">Режим тестирования</Text>
       </View>
-      
-      {/* Нижняя часть с формой */}
-      <View className="flex-[0.6] bg-white rounded-t-[40px] px-8 pt-10 pb-6 shadow-2xl">
-        <Text className="text-2xl font-extrabold text-slate-800 mb-8">
-          С возвращением
-        </Text>
-        
-        <View className="space-y-6">
-          {/* Email Input */}
-          <View>
-            <Text className="text-sm font-bold text-slate-500 mb-2 ml-1 uppercase tracking-wider">Email</Text>
-            <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-2xl px-4 h-14 focus:border-cyan-500 focus:bg-white">
-              <Ionicons name="mail-outline" size={20} color="#94A3B8" />
-              <TextInput
-                className="flex-1 ml-3 text-slate-800 font-medium h-full"
-                placeholder="Введите ваш email"
-                placeholderTextColor="#94A3B8"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                value={email}
-                onChangeText={setEmail}
-              />
-            </View>
+
+      <View className="flex-1 mt-[45%] px-6">
+        <View className="bg-white rounded-[32px] p-6 shadow-xl shadow-slate-200/50">
+          <View className="mb-6 items-center">
+            <Text className="text-2xl font-bold text-slate-800">Выберите роль</Text>
+            <Text className="text-slate-500 text-center mt-2 leading-5 text-sm">
+              Для быстрого тестирования системы выберите должность, под которой хотите войти:
+            </Text>
           </View>
 
-          {/* Password Input */}
-          <View>
-            <Text className="text-sm font-bold text-slate-500 mb-2 ml-1 uppercase tracking-wider">Пароль</Text>
-            <View className="flex-row items-center bg-slate-50 border border-slate-200 rounded-2xl px-4 h-14 focus:border-cyan-500 focus:bg-white">
-              <Ionicons name="lock-closed-outline" size={20} color="#94A3B8" />
-              <TextInput
-                className="flex-1 ml-3 text-slate-800 font-medium h-full"
-                placeholder="Введите пароль"
-                placeholderTextColor="#94A3B8"
-                secureTextEntry={!showPassword}
-                value={password}
-                onChangeText={setPassword}
-              />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)} className="p-2">
-                <Ionicons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color="#94A3B8" />
+          <View className="space-y-3">
+            {ROLES.map((role) => (
+              <TouchableOpacity
+                key={role.id}
+                className="flex-row items-center p-3 rounded-2xl border border-slate-100 bg-slate-50 active:bg-slate-100 mb-3"
+                onPress={() => handleRoleLogin(role.id, role.email)}
+                disabled={loadingRole !== null}
+              >
+                <View className={`w-12 h-12 rounded-2xl ${role.color} items-center justify-center shadow-sm`}>
+                  <Text className="text-xl">{role.icon}</Text>
+                </View>
+                <View className="flex-1 ml-4 justify-center">
+                  <Text className="text-base font-bold text-slate-800">{role.name}</Text>
+                  <Text className="text-slate-400 text-[10px] mt-0.5 font-medium uppercase tracking-wider">{role.id}</Text>
+                </View>
+                {loadingRole === role.id ? (
+                  <ActivityIndicator color="#0891B2" />
+                ) : (
+                  <Text className="text-slate-300 text-2xl font-light mr-2">›</Text>
+                )}
               </TouchableOpacity>
-            </View>
+            ))}
           </View>
         </View>
-
-        <TouchableOpacity className="mt-4 mb-8">
-          <Text className="text-cyan-600 font-semibold text-right text-sm">Забыли пароль?</Text>
-        </TouchableOpacity>
-
-        {/* Login Button */}
-        <TouchableOpacity 
-          className="w-full bg-[#0891B2] h-14 rounded-2xl items-center justify-center shadow-lg shadow-cyan-500/30 active:bg-cyan-700"
-          onPress={handleLogin}
-        >
-          <Text className="text-white font-bold text-lg tracking-wide">Войти в систему</Text>
-        </TouchableOpacity>
-        
-        <View className="flex-row justify-center mt-8">
-          <Text className="text-slate-500 text-sm">Нет аккаунта? </Text>
-          <TouchableOpacity>
-            <Text className="text-cyan-600 font-bold text-sm">Свяжитесь с админом</Text>
-          </TouchableOpacity>
-        </View>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
