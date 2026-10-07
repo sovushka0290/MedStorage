@@ -44,3 +44,7 @@ Thumbs.db
 scratch/
 ts.txt
 tz.txt
+
+*.db
+__pycache__/
+.env
